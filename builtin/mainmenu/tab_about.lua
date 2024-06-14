@@ -17,6 +17,10 @@
 
 -- https://github.com/orgs/minetest/teams/engine/members
 
+local fc_team = {
+	"fancyfinn9 <fancyfinn9@gmail.com>"
+}
+
 local core_developers = {
 	"Perttu Ahola (celeron55) <celeron55@gmail.com> [Project founder]",
 	"sfan5 <sfan5@live.de>",
@@ -120,13 +124,24 @@ return {
 
 	cbf_formspec = function(tabview, name, tabdata)
 		local logofile = defaulttexturedir .. "logo.png"
-		local version = core.get_version()
+		local version = {
+			project="FancyClient",
+			is_dev=true,
+			string="5.9.0-dev",
+			proto_min=37,
+			proto_max=44,
+			hash="5.9.0-dev-9def45a-dirty"
+		}
 
 		local hypertext = {
 			"<tag name=heading color=#ff0>",
 			"<tag name=gray color=#aaa>",
 		}
 
+		table.insert_all(hypertext, {
+			"<heading>", fgettext_ne("FancyClient Team"), "</heading>\n",
+		})
+		prepare_credits(hypertext, fc_team)
 		table.insert_all(hypertext, {
 			"<heading>", fgettext_ne("Core Developers"), "</heading>\n",
 		})
@@ -158,7 +173,7 @@ return {
 			"style[label_button;border=false]" ..
 			"button[0.1,3.4;5.3,0.5;label_button;" ..
 			core.formspec_escape(version.project .. " " .. version.string) .. "]" ..
-			"button_url[1.5,4.1;2.5,0.8;homepage;minetest.net;https://www.minetest.net/]" ..
+			"button_url[1.5,4.1;2.5,0.8;homepage;GitHub;https://github.com/fancyfinn9/fancyclient]" ..
 			"hypertext[5.5,0.25;9.75,6.6;credits;" .. minetest.formspec_escape(hypertext) .. "]"
 
 		-- Render information

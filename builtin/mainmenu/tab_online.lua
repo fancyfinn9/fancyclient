@@ -17,13 +17,20 @@
 
 local function get_sorted_servers()
 	local servers = {
+		jma = {},
 		fav = {},
 		public = {},
 		incompatible = {}
 	}
 
 	local favs = serverlistmgr.get_favorites()
+	local jmas = {
+			{ address = "jmaminetest.mooo.com", port = 30001.0 },
+			{ address = "jmaminetest.mooo.com", port = 30002.0 },
+			{ address = "jmaminetest.mooo.com", port = 30003.0 },
+		}
 	local taken_favs = {}
+	local taken_jmas = {}
 	local result = menudata.search_result or serverlistmgr.servers
 	for _, server in ipairs(result) do
 		server.is_favorite = false
@@ -34,8 +41,17 @@ local function get_sorted_servers()
 				break
 			end
 		end
+		for index, jma in ipairs(jmas) do
+			if server.address == jma.address and server.port == jma.port then
+				taken_jmas[index] = true
+				server.is_jma = true
+				break
+			end
+		end
 		server.is_compatible = is_server_protocol_compat(server.proto_min, server.proto_max)
-		if server.is_favorite then
+		if server.is_jma then
+			table.insert(servers.jma, server)
+		elseif server.is_favorite then
 			table.insert(servers.fav, server)
 		elseif server.is_compatible then
 			table.insert(servers.public, server)
@@ -48,6 +64,11 @@ local function get_sorted_servers()
 		for index, fav in ipairs(favs) do
 			if not taken_favs[index] then
 				table.insert(servers.fav, fav)
+			end
+		end
+		for index, jma in ipairs(jmas) do
+			if not taken_jmas[index] then
+				table.insert(servers.jma, jma)
 			end
 		end
 	end
@@ -132,7 +153,8 @@ local function get_formspec(tabview, name, tabdata)
 		"4=" .. core.formspec_escape(defaulttexturedir .. "server_ping_1.png") .. "," ..
 		"5=" .. core.formspec_escape(defaulttexturedir .. "server_favorite.png") .. "," ..
 		"6=" .. core.formspec_escape(defaulttexturedir .. "server_public.png") .. "," ..
-		"7=" .. core.formspec_escape(defaulttexturedir .. "server_incompatible.png") .. ";" ..
+		"7=" .. core.formspec_escape(defaulttexturedir .. "server_incompatible.png") .. "," ..
+		"8=" .. core.formspec_escape(defaulttexturedir .. "server_favorite.png") .. ";" ..
 		"color,span=1;" ..
 		"text,align=inline;"..
 		"color,span=1;" ..
@@ -154,11 +176,12 @@ local function get_formspec(tabview, name, tabdata)
 	local servers = get_sorted_servers()
 
 	local dividers = {
+		jma = "8,#ffff01," .. fgettext("Official JMA") .. ",,,0,0,,",
 		fav = "5,#ffff00," .. fgettext("Favorites") .. ",,,0,0,,",
 		public = "6,#4bdd42," .. fgettext("Public Servers") .. ",,,0,0,,",
 		incompatible = "7,"..mt_color_grey.."," .. fgettext("Incompatible Servers") .. ",,,0,0,,"
 	}
-	local order = {"fav", "public", "incompatible"}
+	local order = {"jma", "fav", "public", "incompatible"}
 
 	tabdata.lookup = {} -- maps row number to server
 	local rows = {}
